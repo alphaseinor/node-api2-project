@@ -92,7 +92,6 @@ router.delete('/:id', (req, res) => {
     if(post[0].id !== null){
       db.remove(req.params.id)
       .then(deleted => {
-        console.log("post")
         if(deleted > 0){
           res.status(200).json(post)
         }else{
@@ -106,6 +105,33 @@ router.delete('/:id', (req, res) => {
   .catch(error => {
 
   })
+})
+
+router.put('/:id', (req, res) => {
+  const changes = req.body
+  if(changes.title !== undefined || changes.contents !== undefined){
+    db.findById(req.params.id)
+    .then(post => {
+      if(post[0].id !== null){
+        db.update(req.params.id, changes)
+        .then(updated => {
+          db.findById(req.params.id)
+            .then(res.status(200).json(post))
+            .catch(err => console.log(err))
+        })
+        .catch(err => {
+          res.status(500).json({ error: "The post information could not be modified." })
+        })
+      }else{
+        res.status(404).json({ message: "The post with the specified ID does not exist." })
+      }
+    })
+    .catch(error => {
+
+    })
+  } else {
+    res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
+  }
 })
 
 module.exports = router
